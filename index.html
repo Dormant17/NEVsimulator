@@ -3,120 +3,255 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEV-C Carbon Simulator | Carbon Neutrality Pathway Visualizer</title>
+    <title>NEV-C Carbon Simulator | Vanilla JS Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: #2563eb; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-        /* Custom range slider styling */
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 18px;
-            width: 18px;
-            border-radius: 50%;
-            background: #2563eb;
-            cursor: pointer;
-            box-shadow: 0 0 2px rgba(0,0,0,0.2);
-            margin-top: -5px;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            cursor: pointer;
-            background: #e2e8f0;
-            border-radius: 4px;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        canvas { max-width: 100% !important; height: 350px !important; }
     </style>
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://aistudiocdn.com/react@^19.2.0",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-        "react/": "https://aistudiocdn.com/react@^19.2.0/",
-        "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-        "recharts": "https://aistudiocdn.com/recharts@^3.5.0"
-      }
-    }
-    </script>
+<script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "recharts": "https://esm.sh/recharts@^3.6.0"
+  }
+}
+</script>
 </head>
-<body>
-    <div id="root"></div>
+<body class="overflow-hidden">
+    <div class="flex h-screen bg-slate-50">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="flex-shrink-0 w-80 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300">
+            <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white shadow-lg shadow-blue-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900">NEV-C Sim</h1>
+                    <p class="text-xs text-slate-400 font-medium">Carbon Trajectory v2.0</p>
+                </div>
+            </div>
 
-    <script type="module">
-        import React, { useState, useMemo, useEffect } from 'react';
-        import ReactDOM from 'react-dom/client';
-        import { 
-            Zap, TrendingUp, Battery, Settings2, LayoutDashboard, Car, Info, 
-            ArrowUpRight, ArrowDownRight, Activity, Leaf 
-        } from 'lucide-react';
-        import {
-            AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-            LineChart, Line, Legend, ReferenceLine, ComposedChart
-        } from 'recharts';
+            <div class="flex-1 overflow-y-auto p-5 space-y-8 custom-scrollbar">
+                <!-- Presets -->
+                <section>
+                    <div class="bg-slate-900 p-4 rounded-xl text-white shadow-md">
+                        <div class="flex items-center gap-2 mb-3 text-sm font-semibold opacity-90">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Scenario Presets
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="loadScenario('baseline')" class="py-1.5 text-[10px] font-bold rounded bg-white/10 hover:bg-white/20 border border-white/5 transition-all">Baseline</button>
+                            <button onclick="loadScenario('regulatory')" class="py-1.5 text-[10px] font-bold rounded bg-white/10 hover:bg-white/20 border border-white/5 transition-all">Regulatory</button>
+                            <button onclick="loadScenario('blueprint')" class="py-1.5 text-[10px] font-bold rounded bg-white/10 hover:bg-white/20 border border-white/5 transition-all">Blueprint</button>
+                        </div>
+                    </div>
+                </section>
 
-        // --- TYPES & CONSTANTS ---
-        const ScenarioType = {
-            BASELINE: 'Baseline',
-            REGULATORY: 'Regulatory',
-            BLUEPRINT: 'Blueprint'
+                <!-- Supply Controls -->
+                <section class="space-y-4">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Grid Supply (Scope 2)</h3>
+                    <div class="space-y-5">
+                        <div class="control-item">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-semibold text-slate-600">2050 Coal Ratio</label>
+                                <span id="val-coal" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">45%</span>
+                            </div>
+                            <input type="range" id="input-coal" min="0" max="70" value="45" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div class="control-item">
+                            <label class="text-xs font-semibold text-slate-600 block mb-2">Phase-out Speed</label>
+                            <div class="flex bg-slate-100 rounded-lg p-1" id="speed-toggle">
+                                <button onclick="updateSpeed('slow')" data-speed="slow" class="speed-btn flex-1 py-1 text-[10px] rounded transition-all text-slate-500">Slow</button>
+                                <button onclick="updateSpeed('moderate')" data-speed="moderate" class="speed-btn flex-1 py-1 text-[10px] rounded transition-all bg-white shadow text-blue-600 font-bold">Moderate</button>
+                                <button onclick="updateSpeed('aggressive')" data-speed="aggressive" class="speed-btn flex-1 py-1 text-[10px] rounded transition-all text-slate-500">Aggressive</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Market Controls -->
+                <section class="space-y-4 pt-4 border-t border-slate-100">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Market Demand</h3>
+                    <div class="space-y-5">
+                        <div class="control-item">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-semibold text-slate-600">2035 NEV Stock</label>
+                                <span id="val-nev" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">50%</span>
+                            </div>
+                            <input type="range" id="input-nev" min="10" max="90" value="50" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div class="control-item">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-semibold text-slate-600">Annual Growth</label>
+                                <span id="val-growth" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">2.5%</span>
+                            </div>
+                            <input type="range" id="input-growth" min="0" max="5" step="0.1" value="2.5" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tech Controls -->
+                <section class="space-y-4 pt-4 border-t border-slate-100">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Technology</h3>
+                    <div class="space-y-5">
+                        <div class="control-item">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-semibold text-slate-600">Mfg. Intensity Drop</label>
+                                <span id="val-mfg" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">3.5%</span>
+                            </div>
+                            <input type="range" id="input-mfg" min="0" max="10" value="3.5" step="0.5" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div class="control-item">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-semibold text-slate-600">Drive Efficiency</label>
+                                <span id="val-eff" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">1.5%</span>
+                            </div>
+                            <input type="range" id="input-eff" min="0" max="5" step="0.1" value="1.5" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-10">
+            <div class="max-w-6xl mx-auto">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Carbon Neutrality Pathways</h2>
+                    <p class="text-slate-500 mt-2 max-w-3xl leading-relaxed text-sm lg:text-base">
+                        Analyzing the "Driving with Coal" paradox. This model visualizes how vehicle electrification 
+                        couples with power grid structure to determine real climate impact.
+                    </p>
+                </header>
+
+                <!-- Scorecard -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- Peak Year -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div class="bg-amber-100 text-amber-600 p-2 rounded-lg w-fit mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Peak Emission Year</p>
+                            <h4 id="metric-peak-year" class="text-2xl font-bold text-slate-800 mt-1">2032</h4>
+                        </div>
+                    </div>
+                    <!-- Breakeven Year -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div class="bg-blue-100 text-blue-600 p-2 rounded-lg w-fit mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1.08 9.17A7 7 0 0 1 11 20z"/><path d="M11 20c-2.33 0-4.31-1.39-5.19-3.38a1.94 1.94 0 0 0-1.81-1.12H2"/><path d="M11 20c2.33 0 4.31-1.39 5.19-3.38a1.94 1.94 0 0 1 1.81-1.12H22"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Breakeven Year</p>
+                            <h4 id="metric-breakeven" class="text-2xl font-bold text-slate-800 mt-1">2028</h4>
+                        </div>
+                    </div>
+                    <!-- 2060 Emission -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div class="bg-emerald-100 text-emerald-600 p-2 rounded-lg w-fit mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l5 5 5-5"/><path d="M7 13l5 5 5-5"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">2060 Emission Level</p>
+                            <h4 id="metric-2060" class="text-2xl font-bold text-slate-800 mt-1">125 Mt</h4>
+                        </div>
+                    </div>
+                    <!-- Total Avoided -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div class="bg-indigo-100 text-indigo-600 p-2 rounded-lg w-fit mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Cum. Avoided CO₂</p>
+                            <h4 id="metric-cum" class="text-2xl font-bold text-slate-800 mt-1">12.4 Gt</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="space-y-8">
+                    <!-- Chart 1: Composition -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm lg:text-base">
+                                <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                                NEV Lifecycle Emission Breakdown (Mt CO₂e)
+                            </h3>
+                        </div>
+                        <div class="relative">
+                            <canvas id="compositionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Comparison -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm lg:text-base">
+                                <span class="w-1.5 h-6 bg-emerald-600 rounded-full"></span>
+                                Carbon Breakeven: NEV Actual vs. ICE Baseline
+                            </h3>
+                        </div>
+                        <div class="relative">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insight Footer -->
+                <div class="mt-8 bg-blue-900 text-blue-100 p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </div>
+                    <div class="relative z-10 max-w-2xl">
+                        <h4 class="font-bold text-xl mb-3 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            Key Strategic Insight
+                        </h4>
+                        <p class="text-blue-200 leading-relaxed text-sm lg:text-base">
+                            The "Driving with Coal" effect is real. If the grid remains carbon-intensive, the climate benefits of EVs are delayed by decades. 
+                            <strong>Supply-side (Grid) cleaning</strong> must outpace <strong>Demand-side (Market) electrification</strong> to achieve carbon neutrality goals.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        let state = {
+            coalRatio: 45,
+            speed: 'moderate',
+            nevStock: 50,
+            growth: 2.5,
+            mfgDrop: 3.5,
+            efficiency: 1.5
         };
 
-        const DEFAULT_PARAMS = {
-            targetCoalRatio2050: 15,
-            gridDecarbonizationSpeed: 'moderate',
-            nevPenetration2035: 50,
-            totalVehicleGrowthRate: 2.5,
-            batteryEnergyDensityGrowth: 3.5,
-            vehicleEfficiencyImprovement: 1.5,
+        const PRESETS = {
+            baseline: { coalRatio: 55, speed: 'slow', nevStock: 35, growth: 3.0, mfgDrop: 1.5, efficiency: 0.5 },
+            regulatory: { coalRatio: 25, speed: 'moderate', nevStock: 60, growth: 2.0, mfgDrop: 3.5, efficiency: 1.5 },
+            blueprint: { coalRatio: 5, speed: 'aggressive', nevStock: 85, growth: 1.2, mfgDrop: 6.0, efficiency: 2.5 }
         };
 
-        const SCENARIOS = {
-            [ScenarioType.BASELINE]: {
-                targetCoalRatio2050: 45,
-                gridDecarbonizationSpeed: 'slow',
-                nevPenetration2035: 40,
-                totalVehicleGrowthRate: 3.0,
-                batteryEnergyDensityGrowth: 2.0,
-                vehicleEfficiencyImprovement: 0.5,
-            },
-            [ScenarioType.REGULATORY]: {
-                targetCoalRatio2050: 20,
-                gridDecarbonizationSpeed: 'moderate',
-                nevPenetration2035: 60,
-                totalVehicleGrowthRate: 2.0,
-                batteryEnergyDensityGrowth: 3.5,
-                vehicleEfficiencyImprovement: 1.5,
-            },
-            [ScenarioType.BLUEPRINT]: {
-                targetCoalRatio2050: 5,
-                gridDecarbonizationSpeed: 'aggressive',
-                nevPenetration2035: 80,
-                totalVehicleGrowthRate: 1.5,
-                batteryEnergyDensityGrowth: 5.0,
-                vehicleEfficiencyImprovement: 2.5,
-            },
-        };
+        let compositionChart = null;
+        let comparisonChart = null;
 
         // --- SIMULATION ENGINE ---
-        const runSimulation = (params) => {
+        function runSimulation() {
             const startYear = 2020;
             const endYear = 2060;
             const results = [];
@@ -130,17 +265,15 @@
             const avgAnnualMileage = 12000;
 
             for (let year = startYear; year <= endYear; year++) {
-                const targetCoal = params.targetCoalRatio2050 / 100;
-                let coalDecayFactor = 1;
-                if (params.gridDecarbonizationSpeed === 'slow') coalDecayFactor = 0.5;
-                if (params.gridDecarbonizationSpeed === 'aggressive') coalDecayFactor = 2.0;
+                const targetCoal = state.coalRatio / 100;
+                let coalDecayFactor = state.speed === 'slow' ? 0.5 : (state.speed === 'aggressive' ? 2.0 : 1.0);
 
                 const progressTo2050 = Math.min(1, (year - startYear) / (2050 - startYear));
                 const currentCoalRatio = initialCoalRatio - (initialCoalRatio - targetCoal) * Math.pow(progressTo2050, coalDecayFactor);
                 const currentGridFactor = (currentCoalRatio / initialCoalRatio) * initialGridFactor;
 
-                const totalStock = (currentNevStock + currentIceStock) * (1 + params.totalVehicleGrowthRate / 100);
-                const targetPenetration2035 = params.nevPenetration2035 / 100;
+                const totalStock = (currentNevStock + currentIceStock) * (1 + state.growth / 100);
+                const targetPenetration2035 = state.nevStock / 100;
                 
                 let penetration = 0;
                 if (year <= 2035) {
@@ -156,8 +289,8 @@
                 currentNevStock = newNevStock;
                 currentIceStock = totalStock - newNevStock;
 
-                const nevMfgEmissionPerCar = 11.0 * Math.pow((1 - params.batteryEnergyDensityGrowth / 200), (year - startYear));
-                const nevAvgEfficiency = 15.0 * Math.pow((1 - params.vehicleEfficiencyImprovement / 100), (year - startYear));
+                const nevMfgEmissionPerCar = 11.0 * Math.pow((1 - state.mfgDrop / 200), (year - startYear));
+                const nevAvgEfficiency = 15.0 * Math.pow((1 - state.efficiency / 100), (year - startYear));
 
                 const mfgEmissions = nevSales * nevMfgEmissionPerCar;
                 const opEmissions = currentNevStock * avgAnnualMileage * (nevAvgEfficiency / 100) * (currentGridFactor / 1000000);
@@ -168,207 +301,150 @@
 
                 results.push({
                     year,
-                    manufacturingEmissions: Number(mfgEmissions.toFixed(2)),
-                    operationalEmissions: Number(opEmissions.toFixed(2)),
-                    totalNEVEmissions: Number((mfgEmissions + opEmissions).toFixed(2)),
-                    iceBaselineEmissions: Number(iceTotal.toFixed(2)),
-                    netReduction: Number((iceTotal - (mfgEmissions + opEmissions)).toFixed(2)),
-                    gridCarbonFactor: Math.round(currentGridFactor),
-                    nevStock: Number(currentNevStock.toFixed(1)),
-                    coalRatio: Number((currentCoalRatio * 100).toFixed(1))
+                    manufacturing: mfgEmissions,
+                    operational: opEmissions,
+                    total: mfgEmissions + opEmissions,
+                    ice: iceTotal,
+                    net: iceTotal - (mfgEmissions + opEmissions)
                 });
             }
             return results;
+        }
+
+        // --- UI UPDATES ---
+        function updateCharts() {
+            const data = runSimulation();
+            const labels = data.map(d => d.year);
+
+            // Update Composition Chart
+            compositionChart.data.labels = labels;
+            compositionChart.data.datasets[0].data = data.map(d => d.operational);
+            compositionChart.data.datasets[1].data = data.map(d => d.manufacturing);
+            compositionChart.update();
+
+            // Update Comparison Chart
+            comparisonChart.data.labels = labels;
+            comparisonChart.data.datasets[0].data = data.map(d => d.total);
+            comparisonChart.data.datasets[1].data = data.map(d => d.ice);
+            comparisonChart.update();
+
+            // Update Metrics
+            const peak = data.reduce((max, d) => d.total > max.val ? {year: d.year, val: d.total} : max, {year: 0, val: 0});
+            document.getElementById('metric-peak-year').innerText = peak.year;
+            
+            const breakeven = data.find(d => d.total < d.ice);
+            document.getElementById('metric-breakeven').innerText = breakeven ? breakeven.year : '> 2060';
+            
+            document.getElementById('metric-2060').innerText = Math.round(data[data.length-1].total) + ' Mt';
+            
+            const cum = data.reduce((sum, d) => sum + d.net, 0) / 1000;
+            document.getElementById('metric-cum').innerText = cum.toFixed(1) + ' Gt';
+        }
+
+        function syncInputs() {
+            document.getElementById('input-coal').value = state.coalRatio;
+            document.getElementById('val-coal').innerText = state.coalRatio + '%';
+            
+            document.getElementById('input-nev').value = state.nevStock;
+            document.getElementById('val-nev').innerText = state.nevStock + '%';
+            
+            document.getElementById('input-growth').value = state.growth;
+            document.getElementById('val-growth').innerText = state.growth + '%';
+            
+            document.getElementById('input-mfg').value = state.mfgDrop;
+            document.getElementById('val-mfg').innerText = state.mfgDrop + '%';
+            
+            document.getElementById('input-eff').value = state.efficiency;
+            document.getElementById('val-eff').innerText = state.efficiency + '%';
+
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                if (btn.dataset.speed === state.speed) {
+                    btn.className = "speed-btn flex-1 py-1 text-[10px] rounded transition-all bg-white shadow text-blue-600 font-bold";
+                } else {
+                    btn.className = "speed-btn flex-1 py-1 text-[10px] rounded transition-all text-slate-500 hover:text-slate-700";
+                }
+            });
+        }
+
+        // --- EVENT HANDLERS ---
+        function loadScenario(type) {
+            state = { ...state, ...PRESETS[type] };
+            syncInputs();
+            updateCharts();
+        }
+
+        function updateSpeed(speed) {
+            state.speed = speed;
+            syncInputs();
+            updateCharts();
+        }
+
+        // Initialize listeners
+        document.getElementById('input-coal').oninput = (e) => { state.coalRatio = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-nev').oninput = (e) => { state.nevStock = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-growth').oninput = (e) => { state.growth = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-mfg').oninput = (e) => { state.mfgDrop = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-eff').oninput = (e) => { state.efficiency = Number(e.target.value); syncInputs(); updateCharts(); };
+
+        // --- CHART INITIALIZATION ---
+        function initCharts() {
+            const ctx1 = document.getElementById('compositionChart').getContext('2d');
+            const grad1 = ctx1.createLinearGradient(0, 0, 0, 300);
+            grad1.addColorStop(0, 'rgba(245, 158, 11, 0.4)');
+            grad1.addColorStop(1, 'rgba(245, 158, 11, 0)');
+
+            const grad2 = ctx1.createLinearGradient(0, 0, 0, 300);
+            grad2.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+            grad2.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+            compositionChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Operational (Scope 2)', data: [], fill: true, backgroundColor: grad1, borderColor: '#f59e0b', tension: 0.4, borderAlpha: 1, pointRadius: 0 },
+                        { label: 'Manufacturing (Scope 3)', data: [], fill: true, backgroundColor: grad2, borderColor: '#6366f1', tension: 0.4, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    scales: { 
+                        y: { stacked: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Actual NEV Pathway', data: [], borderColor: '#3b82f6', borderWidth: 3, tension: 0.4, pointRadius: 0 },
+                        { label: 'ICE Baseline', data: [], borderColor: '#ef4444', borderWidth: 2, borderDash: [5, 5], tension: 0, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    scales: { 
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // --- START ---
+        window.onload = () => {
+            initCharts();
+            syncInputs();
+            updateCharts();
         };
-
-        // --- COMPONENTS ---
-
-        const MetricCard = ({ label, value, subValue, trend, color, icon }) => (
-            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-2">
-                    <div className={`p-2 rounded-lg ${color} bg-opacity-10 text-${color.split('-')[1]}-600`}>
-                        {icon}
-                    </div>
-                    {trend === 'down' && <ArrowDownRight className="text-emerald-500" size={20} />}
-                    {trend === 'up' && <ArrowUpRight className="text-red-500" size={20} />}
-                </div>
-                <div>
-                    <h4 className="text-slate-500 text-xs font-medium uppercase tracking-wide">{label}</h4>
-                    <div className="text-2xl font-bold text-slate-800 mt-1">{value}</div>
-                    {subValue && <div className="text-xs text-slate-400 mt-1">{subValue}</div>}
-                </div>
-            </div>
-        );
-
-        const KeyMetrics = ({ results }) => {
-            const peakEmission = Math.max(...results.map(r => r.totalNEVEmissions));
-            const peakYear = results.find(r => r.totalNEVEmissions === peakEmission)?.year;
-            const finalTotal = results[results.length - 1].totalNEVEmissions;
-            const cumReduction = results.reduce((acc, curr) => acc + curr.netReduction, 0);
-            const breakEvenYear = results.find(d => d.totalNEVEmissions < d.iceBaselineEmissions)?.year;
-
-            return (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <MetricCard label="Peak Emission Year" value={peakYear?.toString() || 'N/A'} subValue={`Peak: ${peakEmission.toFixed(0)} Mt CO₂`} color="bg-amber-500" icon={<Activity size={24} />} />
-                    <MetricCard label="Breakeven Year" value={breakEvenYear?.toString() || '> 2060'} subValue="NEV < ICE Emissions" color="bg-blue-500" trend={breakEvenYear ? 'down' : 'neutral'} icon={<Leaf size={24} />} />
-                    <MetricCard label="2060 Emission Level" value={`${finalTotal.toFixed(0)} Mt`} subValue="Target Net Zero Pathway" color="bg-emerald-500" trend="down" icon={<ArrowDownRight size={24} />} />
-                    <MetricCard label="Cum. Avoided CO₂" value={`${(cumReduction / 1000).toFixed(1)} Gt`} subValue="Total lifecycle benefit" color="bg-indigo-500" icon={<TrendingUp size={24} />} />
-                </div>
-            );
-        };
-
-        const CustomTooltip = ({ active, payload, label }) => {
-            if (active && payload && payload.length) {
-                return (
-                    <div className="bg-white/95 backdrop-blur-md p-3 border border-slate-200 shadow-xl rounded-lg text-sm">
-                        <p className="font-bold text-slate-700 mb-2">{label}</p>
-                        {payload.map((entry, index) => (
-                            <div key={index} className="flex items-center gap-2 mb-1">
-                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                                <span className="text-slate-500">{entry.name}:</span>
-                                <span className="font-mono font-medium">{entry.value} Mt</span>
-                            </div>
-                        ))}
-                    </div>
-                );
-            }
-            return null;
-        };
-
-        const Slider = ({ label, value, min, max, step = 1, unit, description, onChange }) => (
-            <div>
-                <div className="flex justify-between mb-1">
-                    <label className="text-sm font-medium text-slate-600">{label}</label>
-                    <span className="text-sm font-bold text-blue-600">{value}{unit}</span>
-                </div>
-                <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
-                {description && <p className="text-xs text-slate-400 mt-1">{description}</p>}
-            </div>
-        );
-
-        const App = () => {
-            const [params, setParams] = useState(DEFAULT_PARAMS);
-            const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-            const results = useMemo(() => runSimulation(params), [params]);
-
-            const handleScenarioLoad = (type) => setParams(SCENARIOS[type]);
-
-            return (
-                <div className="flex h-screen overflow-hidden bg-slate-50">
-                    <aside className={`flex-shrink-0 w-80 bg-white border-r border-slate-200 transition-all duration-300 flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-80 absolute h-full z-30'}`}>
-                        <div className="p-6 border-b border-slate-100 flex items-center gap-3">
-                            <div className="bg-blue-600 p-2 rounded-lg text-white shadow-lg shadow-blue-200"><Car size={24} /></div>
-                            <div>
-                                <h1 className="font-bold text-lg leading-tight text-slate-900">NEV-C Sim</h1>
-                                <p className="text-xs text-slate-400">Carbon Trajectory Model</p>
-                            </div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                            <div className="bg-slate-900 p-4 rounded-xl text-white shadow-lg">
-                                <div className="flex items-center gap-2 mb-3"><Settings2 size={18} /><span className="font-semibold text-sm">Presets</span></div>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {Object.values(ScenarioType).map(type => (
-                                        <button key={type} onClick={() => handleScenarioLoad(type)} className="px-1 py-2 text-[10px] font-bold rounded-lg bg-white/10 hover:bg-white/20 transition-colors border border-white/10">{type}</button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="font-semibold text-xs text-slate-400 uppercase tracking-widest px-1">Grid Supply</div>
-                                <Slider label="2050 Coal Ratio" value={params.targetCoalRatio2050} min={0} max={60} unit="%" description="Grid cleanliness factor" onChange={(v) => setParams(p => ({ ...p, targetCoalRatio2050: v }))} />
-                                <div className="flex flex-col gap-2">
-                                    <label className="text-sm font-medium text-slate-600">Phase-out Speed</label>
-                                    <div className="flex bg-slate-100 rounded-lg p-1">
-                                        {['slow', 'moderate', 'aggressive'].map(speed => (
-                                            <button key={speed} onClick={() => setParams(p => ({ ...p, gridDecarbonizationSpeed: speed }))} className={`flex-1 py-1 text-[10px] rounded-md capitalize transition-all ${params.gridDecarbonizationSpeed === speed ? 'bg-white shadow text-blue-600 font-bold' : 'text-slate-500'}`}>{speed}</button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
-                                <div className="font-semibold text-xs text-slate-400 uppercase tracking-widest px-1">Market Demand</div>
-                                <Slider label="2035 NEV Stock" value={params.nevPenetration2035} min={20} max={90} unit="%" description="Vehicle population share" onChange={(v) => setParams(p => ({ ...p, nevPenetration2035: v }))} />
-                                <Slider label="Annual Growth" value={params.totalVehicleGrowthRate} min={0} max={5} step={0.1} unit="%" description="Total car population trend" onChange={(v) => setParams(p => ({ ...p, totalVehicleGrowthRate: v }))} />
-                            </div>
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
-                                <div className="font-semibold text-xs text-slate-400 uppercase tracking-widest px-1">Technology</div>
-                                <Slider label="Battery Eco-Mfg" value={params.batteryEnergyDensityGrowth} min={0} max={10} unit="%" description="Annual intensity reduction" onChange={(v) => setParams(p => ({ ...p, batteryEnergyDensityGrowth: v }))} />
-                                <Slider label="Drive Efficiency" value={params.vehicleEfficiencyImprovement} min={0} max={5} step={0.1} unit="%" description="kWh/100km improvement" onChange={(v) => setParams(p => ({ ...p, vehicleEfficiencyImprovement: v }))} />
-                            </div>
-                        </div>
-                    </aside>
-
-                    <main className="flex-1 overflow-y-auto relative p-6 lg:p-10">
-                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="fixed bottom-6 right-6 z-40 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform lg:hidden"><LayoutDashboard size={24} /></button>
-                        
-                        <div className="max-w-6xl mx-auto">
-                            <header className="mb-8">
-                                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Carbon Neutrality Pathways</h2>
-                                <p className="text-slate-500 mt-2 max-w-3xl leading-relaxed">
-                                    Visualizing the <strong>"Driving with Coal"</strong> paradox. This model explores how the coupling between 
-                                    supply-side grid decarbonization and demand-side vehicle electrification determines the real climate impact of NEVs.
-                                </p>
-                            </header>
-
-                            <KeyMetrics results={results} />
-
-                            <div className="grid grid-cols-1 gap-6">
-                                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2"><Activity size={18} className="text-blue-500" /> NEV Lifecycle Emission Breakdown</h3>
-                                    <div className="h-[350px]">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={results}>
-                                                <defs>
-                                                    <linearGradient id="colorMfg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/><stop offset="95%" stopColor="#6366f1" stopOpacity={0}/></linearGradient>
-                                                    <linearGradient id="colorOp" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/><stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/></linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="year" fontSize={11} axisLine={false} tickLine={false} />
-                                                <YAxis fontSize={11} axisLine={false} tickLine={false} tickFormatter={v => `${v}Mt`} />
-                                                <Tooltip content={<CustomTooltip />} />
-                                                <Legend verticalAlign="top" height={36}/>
-                                                <Area type="monotone" dataKey="operationalEmissions" stackId="1" stroke="#f59e0b" fill="url(#colorOp)" name="Operational (Scope 2)" />
-                                                <Area type="monotone" dataKey="manufacturingEmissions" stackId="1" stroke="#6366f1" fill="url(#colorMfg)" name="Manufacturing (Scope 3)" />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2"><Leaf size={18} className="text-emerald-500" /> Carbon Breakeven Analysis: NEV vs ICE</h3>
-                                    <div className="h-[350px]">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <ComposedChart data={results}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="year" fontSize={11} axisLine={false} />
-                                                <YAxis fontSize={11} axisLine={false} />
-                                                <Tooltip content={<CustomTooltip />} />
-                                                <Legend verticalAlign="top" height={36}/>
-                                                <Area type="monotone" dataKey="netReduction" fill="#10b981" fillOpacity={0.05} stroke="none" name="Avoided Emissions" />
-                                                <Line type="monotone" dataKey="iceBaselineEmissions" stroke="#ef4444" strokeWidth={2} dot={false} strokeDasharray="5 5" name="ICE Counterfactual" />
-                                                <Line type="monotone" dataKey="totalNEVEmissions" stroke="#3b82f6" strokeWidth={3} dot={false} name="Actual NEV Pathway" />
-                                            </ComposedChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-8 bg-blue-900 text-blue-100 p-8 rounded-3xl shadow-xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none"><Zap size={120} /></div>
-                                <h4 className="font-bold text-xl mb-3 flex items-center gap-2"><Info size={20} /> Model Insights</h4>
-                                <p className="text-blue-200 leading-relaxed max-w-2xl">
-                                    If the <strong>2050 Coal Ratio</strong> remains high, promoting NEVs without cleaning the grid leads to a "leakage" effect. 
-                                    The simulation shows that grid intensity is the single most influential variable for shifting the breakeven year forward.
-                                    <em> Method: LCA System Dynamics based on DID coupling theory.</em>
-                                </p>
-                            </div>
-                        </div>
-                    </main>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
     </script>
 </body>
 </html>

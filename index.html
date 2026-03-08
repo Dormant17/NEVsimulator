@@ -258,4 +258,180 @@
                 const newNevStock = currentTotalStock * penetration;
                 
                 // Scrappage Replacement
-                const scrapRate = 0.01 + 0.06 * Math.pow(yearProgress
+                const scrapRate = 0.01 + 0.06 * Math.pow(yearProgress, 2);
+                const scrappage = currentNevStock * scrapRate;
+                
+                const nevSales = Math.max(0, newNevStock - currentNevStock + scrappage);
+                currentNevStock = newNevStock;
+
+                // 4. LCA Emissions (Strict mapping to R formulas)
+                
+                // Material: 7.28t -> 5.5t
+                const materialBase = 7.28 - (7.28 - 5.5) * yearProgress * (state.mfgDrop / 3.5);
+                const emissionMaterial = (nevSales * materialBase) / 100; // Output in Mt
+                
+                // Manufacturing: 1.5t * GridRatio
+                const emissionMfg = (nevSales * 1.5 * gridRatio) / 100; 
+
+                // Operation: 168.9 * gridRatio * efficiency
+                const baseEff = 1.0 - (0.25 * yearProgress); 
+                const sliderEffAdj = 1.0 - ((state.efficiency - 1.5) / 100) * (year - startYear);
+                const finalEff = Math.max(0.5, baseEff * sliderEffAdj);
+                const intensity_g_km = 168.9 * gridRatio * finalEff;
+                const emissionOp = (currentNevStock * avgAnnualMileage * intensity_g_km) / 1000000; 
+                
+                // Recycle Offset: -1.5t -> -2.5t
+                const factorRecycle = -1.5 - (1.0 * yearProgress) * (state.mfgDrop / 3.5);
+                const emissionRecycle = (scrappage * factorRecycle) / 100; 
+
+                const totalEmissions = emissionMaterial + emissionMfg + emissionOp + emissionRecycle;
+
+                // ICE Baseline (Assume 200g/km + 8.0t mfg)
+                const iceOp = (currentNevStock * avgAnnualMileage * 200) / 1000000; 
+                const iceTotal = (nevSales * 8.0) / 100 + iceOp; 
+                
+                results.push({
+                    year,
+                    material: emissionMaterial,
+                    manufacturing: emissionMfg,
+                    operational: emissionOp,
+                    recycle: emissionRecycle,
+                    total: totalEmissions,
+                    ice: iceTotal,
+                    net: iceTotal - totalEmissions
+                });
+            }
+            return results;
+        }
+
+        // --- UI UPDATES ---
+        function updateCharts() {
+            const data = runSimulation();
+            const labels = data.map(d => d.year);
+
+            // Update Composition Chart
+            compositionChart.data.labels = labels;
+            compositionChart.data.datasets[0].data = data.map(d => d.operational);
+            compositionChart.data.datasets[1].data = data.map(d => d.material);
+            compositionChart.data.datasets[2].data = data.map(d => d.manufacturing);
+            compositionChart.data.datasets[3].data = data.map(d => d.recycle);
+            compositionChart.update();
+
+            // Update Comparison Chart
+            comparisonChart.data.labels = labels;
+            comparisonChart.data.datasets[0].data = data.map(d => d.total);
+            comparisonChart.data.datasets[1].data = data.map(d => d.ice);
+            comparisonChart.update();
+
+            // Update Metrics
+            const peak = data.reduce((max, d) => d.total > max.val ? {year: d.year, val: d.total} : max, {year: 0, val: 0});
+            document.getElementById('metric-peak-year').innerText = peak.year;
+            document.getElementById('metric-peak-val').innerText = Math.round(peak.val) + ' Mt';
+            
+            document.getElementById('metric-2060').innerText = Math.round(data[data.length-1].total) + ' Mt';
+            
+            const cum = data.reduce((sum, d) => sum + d.net, 0) / 1000;
+            document.getElementById('metric-cum').innerText = cum.toFixed(1) + ' Gt';
+        }
+
+        function syncInputs() {
+            document.getElementById('input-coal').value = state.coalRatio;
+            document.getElementById('val-coal').innerText = state.coalRatio + '%';
+            
+            document.getElementById('input-nev').value = state.nevStock;
+            document.getElementById('val-nev').innerText = state.nevStock + '%';
+            
+            document.getElementById('input-growth').value = state.growth;
+            document.getElementById('val-growth').innerText = state.growth + '%';
+            
+            document.getElementById('input-mfg').value = state.mfgDrop;
+            document.getElementById('val-mfg').innerText = state.mfgDrop;
+            
+            document.getElementById('input-eff').value = state.efficiency;
+            document.getElementById('val-eff').innerText = state.efficiency + '%';
+
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                if (btn.dataset.speed === state.speed) {
+                    btn.className = "speed-btn flex-1 py-1 text-[10px] rounded transition-all bg-white shadow text-blue-600 font-bold";
+                } else {
+                    btn.className = "speed-btn flex-1 py-1 text-[10px] rounded transition-all text-slate-500 hover:text-slate-700";
+                }
+            });
+        }
+
+        // --- EVENT HANDLERS ---
+        function loadScenario(type) {
+            state = { ...state, ...PRESETS[type] };
+            syncInputs();
+            updateCharts();
+        }
+
+        function updateSpeed(speed) {
+            state.speed = speed;
+            syncInputs();
+            updateCharts();
+        }
+
+        // Initialize listeners
+        document.getElementById('input-coal').oninput = (e) => { state.coalRatio = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-nev').oninput = (e) => { state.nevStock = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-growth').oninput = (e) => { state.growth = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-mfg').oninput = (e) => { state.mfgDrop = Number(e.target.value); syncInputs(); updateCharts(); };
+        document.getElementById('input-eff').oninput = (e) => { state.efficiency = Number(e.target.value); syncInputs(); updateCharts(); };
+
+        // --- CHART INITIALIZATION ---
+        function initCharts() {
+            const ctx1 = document.getElementById('compositionChart').getContext('2d');
+            compositionChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Operational (Scope 2)', data: [], fill: true, backgroundColor: '#4DBBD590', borderColor: '#4DBBD5', tension: 0.4, pointRadius: 0 },
+                        { label: 'Material (Scope 3)', data: [], fill: true, backgroundColor: '#F39B7F90', borderColor: '#F39B7F', tension: 0.4, pointRadius: 0 },
+                        { label: 'Manufacturing (Scope 3)', data: [], fill: true, backgroundColor: '#E1872790', borderColor: '#E18727', tension: 0.4, pointRadius: 0 },
+                        { label: 'Recycle Offset', data: [], fill: true, backgroundColor: '#8491B490', borderColor: '#8491B4', tension: 0.4, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    scales: { 
+                        y: { stacked: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'NEV Actual Pathway', data: [], borderColor: '#3b82f6', borderWidth: 3, tension: 0.4, pointRadius: 0 },
+                        { label: 'ICE Baseline', data: [], borderColor: '#ef4444', borderWidth: 2, borderDash: [5, 5], tension: 0, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    scales: { 
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // --- START ---
+        window.onload = () => {
+            initCharts();
+            syncInputs();
+            updateCharts();
+        };
+    </script>
+</body>
+</html>

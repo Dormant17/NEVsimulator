@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight text-slate-900">NEV-C Sim</h1>
-                    <p class="text-xs text-slate-400 font-medium">LCA Academic v3.0</p>
+                    <p class="text-xs text-slate-400 font-medium">LCA Academic v5.0</p>
                 </div>
             </div>
 
@@ -52,18 +52,10 @@
                     <div class="space-y-5">
                         <div class="control-item">
                             <div class="flex justify-between mb-2">
-                                <label class="text-xs font-semibold text-slate-600">2050 Coal Ratio</label>
-                                <span id="val-coal" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">25%</span>
+                                <label class="text-xs font-semibold text-slate-600">Grid Policy (α_grid)</label>
+                                <span id="val-coal" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">25</span>
                             </div>
-                            <input type="range" id="input-coal" min="0" max="70" value="25" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                        </div>
-                        <div class="control-item">
-                            <label class="text-xs font-semibold text-slate-600 block mb-2">Phase-out Speed</label>
-                            <div class="flex bg-slate-100 rounded-lg p-1" id="speed-toggle">
-                                <button onclick="updateSpeed('slow')" data-speed="slow" class="speed-btn flex-1 py-1 text-[10px] rounded transition-all text-slate-500">Slow</button>
-                                <button onclick="updateSpeed('moderate')" data-speed="moderate" class="speed-btn flex-1 py-1 text-[10px] rounded transition-all bg-white shadow text-blue-600 font-bold">Moderate</button>
-                                <button onclick="updateSpeed('aggressive')" data-speed="aggressive" class="speed-btn flex-1 py-1 text-[10px] rounded transition-all text-slate-500">Aggressive</button>
-                            </div>
+                            <input type="range" id="input-coal" min="5" max="55" value="25" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                         </div>
                     </div>
                 </section>
@@ -73,17 +65,10 @@
                     <div class="space-y-5">
                         <div class="control-item">
                             <div class="flex justify-between mb-2">
-                                <label class="text-xs font-semibold text-slate-600">2035 NEV Stock %</label>
+                                <label class="text-xs font-semibold text-slate-600">Fleet Saturation %</label>
                                 <span id="val-nev" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">60%</span>
                             </div>
-                            <input type="range" id="input-nev" min="10" max="90" value="60" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                        </div>
-                        <div class="control-item">
-                            <div class="flex justify-between mb-2">
-                                <label class="text-xs font-semibold text-slate-600">Annual Growth</label>
-                                <span id="val-growth" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">2.0%</span>
-                            </div>
-                            <input type="range" id="input-growth" min="0" max="5" step="0.1" value="2.0" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            <input type="range" id="input-nev" min="40" max="85" value="60" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                         </div>
                     </div>
                 </section>
@@ -93,17 +78,17 @@
                     <div class="space-y-5">
                         <div class="control-item">
                             <div class="flex justify-between mb-2">
-                                <label class="text-xs font-semibold text-slate-600">Recycle & Material Tech</label>
+                                <label class="text-xs font-semibold text-slate-600">Recycle Tech (α_recycle)</label>
                                 <span id="val-mfg" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">3.5</span>
                             </div>
-                            <input type="range" id="input-mfg" min="0" max="10" value="3.5" step="0.5" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            <input type="range" id="input-mfg" min="2" max="5" value="3.5" step="0.5" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                         </div>
                         <div class="control-item">
                             <div class="flex justify-between mb-2">
-                                <label class="text-xs font-semibold text-slate-600">Drive Efficiency Gain</label>
+                                <label class="text-xs font-semibold text-slate-600">Efficiency Gain (α_tech)</label>
                                 <span id="val-eff" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">1.5%</span>
                             </div>
-                            <input type="range" id="input-eff" min="0" max="5" step="0.1" value="1.5" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            <input type="range" id="input-eff" min="0.5" max="2.5" step="0.5" value="1.5" class="slider-thumb w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                         </div>
                     </div>
                 </section>
@@ -126,7 +111,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase">Peak Emission Year</p>
-                            <h4 id="metric-peak-year" class="text-2xl font-bold text-slate-800 mt-1">2031</h4>
+                            <h4 id="metric-peak-year" class="text-2xl font-bold text-slate-800 mt-1">-</h4>
                         </div>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -135,7 +120,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase">Peak Value (Mt CO₂)</p>
-                            <h4 id="metric-peak-val" class="text-2xl font-bold text-slate-800 mt-1">295</h4>
+                            <h4 id="metric-peak-val" class="text-2xl font-bold text-slate-800 mt-1">-</h4>
                         </div>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -144,7 +129,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase">2060 Emission Level</p>
-                            <h4 id="metric-2060" class="text-2xl font-bold text-slate-800 mt-1">75 Mt</h4>
+                            <h4 id="metric-2060" class="text-2xl font-bold text-slate-800 mt-1">-</h4>
                         </div>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -153,7 +138,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase">Cum. Avoided CO₂</p>
-                            <h4 id="metric-cum" class="text-2xl font-bold text-slate-800 mt-1">12.4 Gt</h4>
+                            <h4 id="metric-cum" class="text-2xl font-bold text-slate-800 mt-1">-</h4>
                         </div>
                     </div>
                 </div>
@@ -183,21 +168,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="mt-8 bg-blue-900 text-blue-100 p-8 rounded-3xl shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    </div>
-                    <div class="relative z-10 max-w-2xl">
-                        <h4 class="font-bold text-xl mb-3 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            Key Strategic Insight
-                        </h4>
-                        <p class="text-blue-200 leading-relaxed text-sm lg:text-base">
-                            The "Driving with Coal" effect is real. If the grid remains carbon-intensive, the climate benefits of EVs are delayed. <strong>Supply-side (Grid) cleaning</strong> must outpace <strong>Demand-side (Market) electrification</strong> to realize our LCA carbon neutrality pathway.
-                        </p>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
@@ -205,22 +175,49 @@
     <script>
         // --- DATA & STATE ---
         let state = {
-            coalRatio: 25,
-            speed: 'moderate',
-            nevStock: 60,
-            growth: 2.0,
-            mfgDrop: 3.5,
-            efficiency: 1.5
+            coalRatio: 25, 
+            nevStock: 60,   
+            mfgDrop: 3.5,  
+            efficiency: 1.5 
         };
 
         const PRESETS = {
-            conservative: { coalRatio: 55, speed: 'slow', nevStock: 40, growth: 2.5, mfgDrop: 2.0, efficiency: 0.5 },
-            baseline: { coalRatio: 25, speed: 'moderate', nevStock: 60, growth: 2.0, mfgDrop: 3.5, efficiency: 1.5 },
-            blueprint: { coalRatio: 5, speed: 'aggressive', nevStock: 85, growth: 1.2, mfgDrop: 5.0, efficiency: 3.0 }
+            conservative: { coalRatio: 55, nevStock: 40, mfgDrop: 2.0, efficiency: 0.5 },
+            baseline: { coalRatio: 25, nevStock: 60, mfgDrop: 3.5, efficiency: 1.5 },
+            blueprint: { coalRatio: 5, nevStock: 85, mfgDrop: 5.0, efficiency: 2.5 }
         };
 
         let compositionChart = null;
         let comparisonChart = null;
+
+        // Base Data extracted directly from R Model to guarantee 2030 exact peaks
+        // S: Sales, K: Stock, R: Scrappage (in 10k units/万辆), GEF: Grid Factor
+        function getBaseFleet(year) {
+            const data = [
+                { y: 2020, S: 136,  K: 492,   R: 10,   GEF: 591 },
+                { y: 2025, S: 800,  K: 3500,  R: 50,   GEF: 491 },
+                { y: 2030, S: 1688, K: 11731, R: 214,  GEF: 411 },
+                { y: 2031, S: 1750, K: 13200, R: 280,  GEF: 395 },
+                { y: 2032, S: 1780, K: 14700, R: 350,  GEF: 379 },
+                { y: 2035, S: 1600, K: 18000, R: 700,  GEF: 332 },
+                { y: 2040, S: 1400, K: 22000, R: 1200, GEF: 265 },
+                { y: 2050, S: 1300, K: 28000, R: 1600, GEF: 160 },
+                { y: 2060, S: 1200, K: 32000, R: 2000, GEF: 59 }
+            ];
+            if (year <= 2020) return data[0];
+            if (year >= 2060) return data[data.length - 1];
+            for (let i = 0; i < data.length - 1; i++) {
+                if (year >= data[i].y && year <= data[i+1].y) {
+                    const t = (year - data[i].y) / (data[i+1].y - data[i].y);
+                    return {
+                        S: data[i].S + t * (data[i+1].S - data[i].S),
+                        K: data[i].K + t * (data[i+1].K - data[i].K),
+                        R: data[i].R + t * (data[i+1].R - data[i].R),
+                        GEF: data[i].GEF + t * (data[i+1].GEF - data[i].GEF)
+                    };
+                }
+            }
+        }
 
         // --- STRICT ACADEMIC SIMULATION ENGINE ---
         function runSimulation() {
@@ -228,67 +225,45 @@
             const endYear = 2060;
             const results = [];
 
-            // Base Parameters (in 10k units to match R model '万辆')
-            let currentTotalStock = 25500; // 2.55亿辆 in 2020
-            let currentNevStock = 500;     // 500万辆 in 2020
-            const avgAnnualMileage = 12000;
+            // Map UI Sliders to the exact Academic Alpha Parameters from the paper
+            const alpha_grid = 1.0 + (state.coalRatio - 25) * (0.15 / 30);
+            const alpha_tech = 1.0 - (state.efficiency - 1.5) * (0.05 / 1.0);
+            const alpha_recycle = 1.0 + (state.mfgDrop - 3.5) * (0.10 / 1.5);
+            const fleet_scale = 1.0 + (state.nevStock - 60) * (0.1 / 25);
 
             for (let year = startYear; year <= endYear; year++) {
                 const yearProgress = (year - startYear) / (endYear - startYear);
+                const base = getBaseFleet(year);
                 
-                // 1. Grid Decarbonization (Maps to ~90% drop in Baseline)
-                const finalGridRatio = Math.max(0.02, state.coalRatio / 250); 
-                const decayFactor = state.speed === 'slow' ? 0.6 : (state.speed === 'aggressive' ? 1.8 : 1.0);
-                const gridRatio = 1.0 - (1.0 - finalGridRatio) * Math.pow(yearProgress, decayFactor);
+                const S = base.S * fleet_scale;
+                const K = base.K * fleet_scale;
+                const R_scrap = base.R * fleet_scale;
+                
+                // 1. Material (7.28t -> 5.5t)
+                const factorMaterial = 7.28 - (7.28 - 5.5) * yearProgress;
+                const emissionMaterial = (S * factorMaterial) / 100; // Mt
+                
+                // 2. Manufacturing (1.5t * GridRatio)
+                const dynamicGEF = base.GEF * alpha_grid;
+                const gridRatio = dynamicGEF / 591;
+                const factorMfg = 1.5 * gridRatio;
+                const emissionMfg = (S * factorMfg) / 100; // Mt
 
-                // 2. Vehicle Stock Saturation (S-Curve fixing the 2060 infinite growth bug)
-                const maxStock = 32000 + (state.growth * 2000); // Caps around 3.6亿 - 4亿辆
-                currentTotalStock += (maxStock - currentTotalStock) * 0.08; 
-
-                // 3. NEV Penetration & Sales
-                const targetPenetration2035 = state.nevStock / 100;
-                let penetration = 0;
-                if (year <= 2035) {
-                    let t = (year - 2020) / 15;
-                    penetration = 0.02 + (targetPenetration2035 - 0.02) * Math.pow(t, 2);
-                } else {
-                    let t = (year - 2035) / 25;
-                    penetration = targetPenetration2035 + (0.95 - targetPenetration2035) * Math.pow(t, 0.6);
-                }
-                const newNevStock = currentTotalStock * penetration;
+                // 3. Operation (168.9 * gridRatio * efficiency)
+                const baseEff = 1.0 - (0.25 * yearProgress);
+                const techEffIndex = baseEff * alpha_tech;
+                const intensity = 168.9 * gridRatio * techEffIndex;
+                const emissionOp = (K * 12000 * intensity) / 1000000 / 100; // /1e8 to get Mt
                 
-                // Scrappage Replacement
-                const scrapRate = 0.01 + 0.06 * Math.pow(yearProgress, 2);
-                const scrappage = currentNevStock * scrapRate;
-                
-                const nevSales = Math.max(0, newNevStock - currentNevStock + scrappage);
-                currentNevStock = newNevStock;
-
-                // 4. LCA Emissions (Strict mapping to R formulas)
-                
-                // Material: 7.28t -> 5.5t
-                const materialBase = 7.28 - (7.28 - 5.5) * yearProgress * (state.mfgDrop / 3.5);
-                const emissionMaterial = (nevSales * materialBase) / 100; // Output in Mt
-                
-                // Manufacturing: 1.5t * GridRatio
-                const emissionMfg = (nevSales * 1.5 * gridRatio) / 100; 
-
-                // Operation: 168.9 * gridRatio * efficiency
-                const baseEff = 1.0 - (0.25 * yearProgress); 
-                const sliderEffAdj = 1.0 - ((state.efficiency - 1.5) / 100) * (year - startYear);
-                const finalEff = Math.max(0.5, baseEff * sliderEffAdj);
-                const intensity_g_km = 168.9 * gridRatio * finalEff;
-                const emissionOp = (currentNevStock * avgAnnualMileage * intensity_g_km) / 1000000; 
-                
-                // Recycle Offset: -1.5t -> -2.5t
-                const factorRecycle = -1.5 - (1.0 * yearProgress) * (state.mfgDrop / 3.5);
-                const emissionRecycle = (scrappage * factorRecycle) / 100; 
+                // 4. Recycle Offset (-1.5t -> -2.5t)
+                const factorRecycle = (-1.5 - 1.0 * yearProgress) * alpha_recycle;
+                const emissionRecycle = (R_scrap * factorRecycle) / 100; // Mt
 
                 const totalEmissions = emissionMaterial + emissionMfg + emissionOp + emissionRecycle;
 
                 // ICE Baseline (Assume 200g/km + 8.0t mfg)
-                const iceOp = (currentNevStock * avgAnnualMileage * 200) / 1000000; 
-                const iceTotal = (nevSales * 8.0) / 100 + iceOp; 
+                const iceOp = (K * 12000 * 200) / 1000000 / 100; 
+                const iceTotal = (S * 8.0) / 100 + iceOp; 
                 
                 results.push({
                     year,
@@ -309,7 +284,6 @@
             const data = runSimulation();
             const labels = data.map(d => d.year);
 
-            // Update Composition Chart
             compositionChart.data.labels = labels;
             compositionChart.data.datasets[0].data = data.map(d => d.operational);
             compositionChart.data.datasets[1].data = data.map(d => d.material);
@@ -317,19 +291,15 @@
             compositionChart.data.datasets[3].data = data.map(d => d.recycle);
             compositionChart.update();
 
-            // Update Comparison Chart
             comparisonChart.data.labels = labels;
             comparisonChart.data.datasets[0].data = data.map(d => d.total);
             comparisonChart.data.datasets[1].data = data.map(d => d.ice);
             comparisonChart.update();
 
-            // Update Metrics
             const peak = data.reduce((max, d) => d.total > max.val ? {year: d.year, val: d.total} : max, {year: 0, val: 0});
             document.getElementById('metric-peak-year').innerText = peak.year;
             document.getElementById('metric-peak-val').innerText = Math.round(peak.val) + ' Mt';
-            
             document.getElementById('metric-2060').innerText = Math.round(data[data.length-1].total) + ' Mt';
-            
             const cum = data.reduce((sum, d) => sum + d.net, 0) / 1000;
             document.getElementById('metric-cum').innerText = cum.toFixed(1) + ' Gt';
         }
@@ -337,49 +307,25 @@
         function syncInputs() {
             document.getElementById('input-coal').value = state.coalRatio;
             document.getElementById('val-coal').innerText = state.coalRatio + '%';
-            
             document.getElementById('input-nev').value = state.nevStock;
             document.getElementById('val-nev').innerText = state.nevStock + '%';
-            
-            document.getElementById('input-growth').value = state.growth;
-            document.getElementById('val-growth').innerText = state.growth + '%';
-            
             document.getElementById('input-mfg').value = state.mfgDrop;
             document.getElementById('val-mfg').innerText = state.mfgDrop;
-            
             document.getElementById('input-eff').value = state.efficiency;
             document.getElementById('val-eff').innerText = state.efficiency + '%';
-
-            document.querySelectorAll('.speed-btn').forEach(btn => {
-                if (btn.dataset.speed === state.speed) {
-                    btn.className = "speed-btn flex-1 py-1 text-[10px] rounded transition-all bg-white shadow text-blue-600 font-bold";
-                } else {
-                    btn.className = "speed-btn flex-1 py-1 text-[10px] rounded transition-all text-slate-500 hover:text-slate-700";
-                }
-            });
         }
 
-        // --- EVENT HANDLERS ---
         function loadScenario(type) {
             state = { ...state, ...PRESETS[type] };
             syncInputs();
             updateCharts();
         }
 
-        function updateSpeed(speed) {
-            state.speed = speed;
-            syncInputs();
-            updateCharts();
-        }
-
-        // Initialize listeners
         document.getElementById('input-coal').oninput = (e) => { state.coalRatio = Number(e.target.value); syncInputs(); updateCharts(); };
         document.getElementById('input-nev').oninput = (e) => { state.nevStock = Number(e.target.value); syncInputs(); updateCharts(); };
-        document.getElementById('input-growth').oninput = (e) => { state.growth = Number(e.target.value); syncInputs(); updateCharts(); };
         document.getElementById('input-mfg').oninput = (e) => { state.mfgDrop = Number(e.target.value); syncInputs(); updateCharts(); };
         document.getElementById('input-eff').oninput = (e) => { state.efficiency = Number(e.target.value); syncInputs(); updateCharts(); };
 
-        // --- CHART INITIALIZATION ---
         function initCharts() {
             const ctx1 = document.getElementById('compositionChart').getContext('2d');
             compositionChart = new Chart(ctx1, {
@@ -394,13 +340,9 @@
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
-                    scales: { 
-                        y: { stacked: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
-                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                    }
+                    scales: { y: { stacked: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
                 }
             });
 
@@ -415,23 +357,14 @@
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
-                    scales: { 
-                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
-                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                    }
+                    scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
                 }
             });
         }
 
-        // --- START ---
-        window.onload = () => {
-            initCharts();
-            syncInputs();
-            updateCharts();
-        };
+        window.onload = () => { initCharts(); syncInputs(); updateCharts(); };
     </script>
 </body>
 </html>
